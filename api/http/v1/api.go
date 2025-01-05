@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"path/filepath"
 	"time"
 	"user_system/config"
 	"user_system/internal/service"
@@ -125,4 +126,35 @@ func UpdateNickName(c *gin.Context) {
 		return
 	}
 	rsp.ResponseSuccess(c)
+}
+
+func UploadAvatar(c *gin.Context) {
+	/*
+		Content-Disposition: form-data; name="picture"; filename="1735998726251.jpg"
+		Content-Type: image/jpeg
+
+		�PNG
+	*/
+	userName := c.Query("username")
+	session, _ := c.Cookie(constant.SessionKey)
+	ctx := context.WithValue(context.Background(), constant.SessionKey, session)
+	file, _ := c.FormFile("picture")
+	extension := filepath.Ext(file.Filename)
+	filePath := "/user/image/" + session + extension
+	err := c.SaveUploadedFile(file, filePath)
+	fmt.Printf("upload avatar,filename=%s\n", filePath)
+	req := &service.UploadAvatarRequest{
+		UserName: userName,
+		Avatar:   filePath}
+	uuid := utils.Md5String(req.UserName + time.Now().GoString())
+	ctx = context.WithValue(ctx, "uuid", uuid)
+
+	rsp := &HttpResponse{}
+	avatarRSP, err := service.UploadAvatar(ctx, req)
+
+	if err != nil {
+		rsp.ResponseWithError(c, CodeUploadAvatarErr, err.Error())
+		return
+	}
+	rsp.ResponseWithData(c, avatarRSP)
 }

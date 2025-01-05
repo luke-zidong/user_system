@@ -199,3 +199,33 @@ func updateUserInfo(user *model.User, userName, session string) error {
 	}
 	return nil
 }
+
+func UploadAvatar(ctx context.Context, req *UploadAvatarRequest) (*UploadAvatarResponse, error) {
+	uuid := ctx.Value(constant.ReqUuid)
+	session := ctx.Value(constant.SessionKey).(string)
+	log.Infof("%s|GetUserInfo access from,user_name=%s|session=%s", uuid, req.UserName, session)
+
+	if session == "" || req.UserName == "" {
+		return nil, fmt.Errorf("GetUserInfo|request params invalid")
+	}
+
+	user, err := cache.GetSessionInfo(session)
+	if err != nil {
+		log.Errorf("%s|Failed to get with session=%s|err =%v", uuid, session, err)
+		return nil, fmt.Errorf("getUserInfo|GetSessionInfo err:%v", err)
+	}
+
+	if user.Name != req.UserName {
+		log.Errorf("%s|session info not match with username=%s", uuid, req.UserName)
+	}
+	log.Infof("%s|Succ to GetUserInfo|user_name=%s|session=%s", uuid, req.UserName, session)
+
+	if err != nil {
+		log.Errorf("%s|Failed to get with session=%s|err =%v", uuid, session, err)
+		return nil, fmt.Errorf("UploadAvatar|GetSessionInfo err:%v", err)
+	}
+	return &UploadAvatarResponse{
+		UserName: user.Name,
+		HeadURL:  req.Avatar,
+	}, nil
+}

@@ -39,3 +39,18 @@ type UpdateNickNameRequest struct {
 	UserName    string `json:"user_name"`
 	NewNickName string `json:"new_nick_name"`
 }
+
+type UploadAvatarRequest struct {
+	UserName string
+	Avatar   string
+}
+
+type UploadAvatarResponse struct {
+	UserName string `json:"user_name"`
+	HeadURL  string `json:"headurl"`
+}
+
+type Form struct {
+	Name     string `form:"name" binding:"required"`
+	Filename string `form:"filename"`
+}
