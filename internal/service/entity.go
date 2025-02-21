@@ -41,13 +41,13 @@ type UpdateNickNameRequest struct {
 }
 
 type UploadAvatarRequest struct {
-	UserName string
-	Avatar   string
+	UserName string `json:"user_name"`
+	Avatar   string `json:"head_url"`
 }
 
 type UploadAvatarResponse struct {
 	UserName string `json:"user_name"`
-	HeadURL  string `json:"headurl"`
+	HeadURL  string `json:"head_url"`
 }
 
 type Form struct {

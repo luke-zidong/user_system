@@ -203,29 +203,31 @@ func updateUserInfo(user *model.User, userName, session string) error {
 func UploadAvatar(ctx context.Context, req *UploadAvatarRequest) (*UploadAvatarResponse, error) {
 	uuid := ctx.Value(constant.ReqUuid)
 	session := ctx.Value(constant.SessionKey).(string)
-	log.Infof("%s|GetUserInfo access from,user_name=%s|session=%s", uuid, req.UserName, session)
+	log.Infof("%s|UpdateUserHeadURL access from,user_name=%s|session=%s", uuid, req.UserName, session)
+	log.Infof("UpdateUserHeadURL|req==%v", req)
 
 	if session == "" || req.UserName == "" {
-		return nil, fmt.Errorf("GetUserInfo|request params invalid")
+		return nil, fmt.Errorf("UpdateUserHeadURL|request params invalid")
 	}
 
 	user, err := cache.GetSessionInfo(session)
 	if err != nil {
 		log.Errorf("%s|Failed to get with session=%s|err =%v", uuid, session, err)
-		return nil, fmt.Errorf("getUserInfo|GetSessionInfo err:%v", err)
+		return nil, fmt.Errorf("UpdateUserHeadURL|GetSessionInfo err:%v", err)
 	}
 
 	if user.Name != req.UserName {
-		log.Errorf("%s|session info not match with username=%s", uuid, req.UserName)
+		log.Errorf("UpdateUserHeadURL|%s|session info not match with username=%s", uuid, req.UserName)
+		return nil, fmt.Errorf("UpdateUserHeadURL|GetSessionInfo err:%v", err)
 	}
-	log.Infof("%s|Succ to GetUserInfo|user_name=%s|session=%s", uuid, req.UserName, session)
 
-	if err != nil {
-		log.Errorf("%s|Failed to get with session=%s|err =%v", uuid, session, err)
-		return nil, fmt.Errorf("UploadAvatar|GetSessionInfo err:%v", err)
+	updateUser := &model.User{
+		HeadURL: req.Avatar,
 	}
+	fmt.Println(updateUser)
+
 	return &UploadAvatarResponse{
 		UserName: user.Name,
-		HeadURL:  req.Avatar,
-	}, nil
+		HeadURL:  user.HeadURL,
+	}, updateUserInfo(updateUser, req.UserName, session)
 }

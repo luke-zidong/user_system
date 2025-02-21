@@ -140,12 +140,16 @@ func UploadAvatar(c *gin.Context) {
 	ctx := context.WithValue(context.Background(), constant.SessionKey, session)
 	file, _ := c.FormFile("picture")
 	extension := filepath.Ext(file.Filename)
-	filePath := "/user/image/" + session + extension
+	filename := fmt.Sprintf("%s%s", userName, extension)
+	filePath := "./web/upload/images/" + filename
 	err := c.SaveUploadedFile(file, filePath)
-	fmt.Printf("upload avatar,filename=%s\n", filePath)
+	if err != nil {
+		log.Errorf("save file err %v", err)
+	}
+	fileURL := "/upload/images/" + filename
 	req := &service.UploadAvatarRequest{
 		UserName: userName,
-		Avatar:   filePath}
+		Avatar:   fileURL}
 	uuid := utils.Md5String(req.UserName + time.Now().GoString())
 	ctx = context.WithValue(ctx, "uuid", uuid)
 
