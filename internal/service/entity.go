@@ -47,7 +47,7 @@ type UploadAvatarRequest struct {
 
 type UploadAvatarResponse struct {
 	UserName string `json:"user_name"`
-	HeadURL  string `json:"head_url"`
+	HeadURL  string `json:"headurl"`
 }
 
 type Form struct {
