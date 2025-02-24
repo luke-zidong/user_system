@@ -32,6 +32,7 @@ type GetUserInfoResponse struct {
 	Gender   string `json:"gender"`
 	PassWord string `json:"pass_word"`
 	NickName string `json:"nick_name"`
+	HeadURL  string `json:"headurl"`
 }
 
 // UpdateNickNameRequest 修改用户信息返回结构
@@ -50,7 +51,7 @@ type UploadAvatarResponse struct {
 	HeadURL  string `json:"headurl"`
 }
 
-type Form struct {
-	Name     string `form:"name" binding:"required"`
-	Filename string `form:"filename"`
+// LogoutRequest 登出请求
+type UnregisterRequest struct {
+	UserName string `json:"user_name"`
 }

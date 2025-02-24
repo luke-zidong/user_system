@@ -124,6 +124,7 @@ func GetUserInfo(ctx context.Context, req *GetUserInfoRequest) (*GetUserInfoResp
 		Gender:   user.Gender,
 		PassWord: user.PassWord,
 		NickName: user.NickName,
+		HeadURL:  user.HeadURL,
 	}, nil
 }
 
@@ -224,10 +225,46 @@ func UploadAvatar(ctx context.Context, req *UploadAvatarRequest) (*UploadAvatarR
 	updateUser := &model.User{
 		HeadURL: req.Avatar,
 	}
-	fmt.Println(updateUser)
 
 	return &UploadAvatarResponse{
 		UserName: user.Name,
 		HeadURL:  user.HeadURL,
 	}, updateUserInfo(updateUser, req.UserName, session)
+}
+
+// Unregister 注销
+func Unregister(ctx context.Context, req *UnregisterRequest) error {
+	uuid := ctx.Value(constant.ReqUuid)
+	session := ctx.Value(constant.SessionKey).(string)
+	log.Infof("%s|Unregister access from,user_name=%s|session=%s", uuid, req.UserName, session)
+	// 要注销，必须要是在登录态
+	_, err := cache.GetSessionInfo(session)
+	if err != nil {
+		log.Errorf("%s|Failed to get with session=%s|err =%v", uuid, session, err)
+		return fmt.Errorf("Unregister|GetSessionInfo err:%v", err)
+	}
+
+	err = cache.DelSessionInfo(session)
+	if err != nil {
+		log.Errorf("%s|Failed to delSessionInfo :%s", uuid, session)
+		return fmt.Errorf("del session err:%v", err)
+	}
+	log.Infof("%s|Success to delSessionInfo :%s", uuid, session)
+
+	affectedRows := dao.DeleteUser(req.UserName)
+
+	deleteUser := &model.User{
+		Name: req.UserName,
+	}
+
+	// db删除成功
+	if affectedRows == 1 {
+		//user, err := dao.GetUserByName(req.UserName)
+		if err == nil {
+			cache.DeleteCacheInfo(deleteUser)
+		} else {
+			log.Error("Failed to get dbUserInfo for cache, username=%s with err:", req.UserName, err.Error())
+		}
+	}
+	return nil
 }

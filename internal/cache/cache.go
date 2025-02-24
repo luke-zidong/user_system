@@ -41,6 +41,12 @@ func UpdateCachedUserInfo(user *model.User) error {
 	return err
 }
 
+func DeleteCacheInfo(user *model.User) error {
+	redisKey := constant.UserInfoPrefix + user.Name
+	_, err := utils.GetRedisCli().Del(context.Background(), redisKey).Result()
+	return err
+}
+
 func GetSessionInfo(session string) (*model.User, error) {
 	redisKey := constant.SessionKeyPrefix + session
 	val, err := utils.GetRedisCli().Get(context.Background(), redisKey).Result()

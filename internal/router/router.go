@@ -31,6 +31,8 @@ func InitRouterAndServe() {
 	r.POST("/user/update_nick_name", AuthMiddleWare(), api.UpdateNickName)
 	// 更新用户头像
 	r.POST("/uploadpic", AuthMiddleWare(), api.UploadAvatar)
+	// 用户注销
+	r.DELETE("/user/unregister", AuthMiddleWare(), api.Unregister)
 
 	r.Static("/static/", "./web/static/")
 	r.Static("/upload/images/", "./web/upload/images/")

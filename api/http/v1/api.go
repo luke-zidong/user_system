@@ -162,3 +162,25 @@ func UploadAvatar(c *gin.Context) {
 	}
 	rsp.ResponseWithData(c, avatarRSP)
 }
+
+// Unregister 注销
+func Unregister(c *gin.Context) {
+	session, _ := c.Cookie(constant.SessionKey)
+	ctx := context.WithValue(context.Background(), constant.SessionKey, session)
+	req := &service.UnregisterRequest{}
+	rsp := &HttpResponse{}
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		log.Errorf("bind get Unregister request json err %v", err)
+		rsp.ResponseWithError(c, CodeBodyBindErr, err.Error())
+		return
+	}
+	uuid := utils.Md5String(req.UserName + time.Now().GoString())
+	ctx = context.WithValue(ctx, "uuid", uuid)
+	if err := service.Unregister(ctx, req); err != nil {
+		rsp.ResponseWithError(c, CodeLogoutErr, err.Error())
+		return
+	}
+	c.SetCookie(constant.SessionKey, session, -1, "/", "", false, true)
+	rsp.ResponseSuccess(c)
+}
